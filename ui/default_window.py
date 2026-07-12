@@ -14,14 +14,22 @@ or editor logic. Its job is simply to assemble the interface.
 
 # QWidget is used as the base widget that will occupy the center
 # of the QMainWindow.
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QMainWindow,
     QWidget,
     QHBoxLayout,
+    QVBoxLayout,
+    QSplitter,
 )
 
+from ui.sidebar import Sidebar
+from ui.editor import CodeEditor
+from ui.chat_panel import AIChatPanel
+from ui.terminal import TerminalPanel
 
-class DefaultWindow(QMainWindow):
+
+class MainWindow(QMainWindow):
     """
     The main application window.
 
@@ -89,20 +97,20 @@ class DefaultWindow(QMainWindow):
     def create_widgets(self):
         """
         Create the widgets used by the interface.
-
-        For now, we only create the central widget.
-        Additional widgets will be added later.
         """
 
         # QMainWindow does NOT directly use layouts.
-        #
-        # Instead, it requires a "central widget"
-        # that will contain our layouts.
+        # Instead, it requires a central widget that will contain our layouts.
         self.central_widget = QWidget()
 
-        # Tell QMainWindow to use this widget
-        # as the center of the application.
+        # Tell QMainWindow to use this widget as the center of the application.
         self.setCentralWidget(self.central_widget)
+
+        # Create the main UI panels.
+        self.sidebar = Sidebar()
+        self.editor = CodeEditor()
+        self.chat_panel = AIChatPanel()
+        self.terminal = TerminalPanel()
 
     # ---------------------------------------------------------
     # Layout Creation
@@ -119,18 +127,24 @@ class DefaultWindow(QMainWindow):
             AI Chat
         """
 
-        # Horizontal layout means widgets
-        # will be arranged from left to right.
-        self.main_layout = QHBoxLayout()
+        top_splitter = QSplitter(Qt.Horizontal)
+        top_splitter.addWidget(self.sidebar)
+        top_splitter.addWidget(self.editor)
+        top_splitter.addWidget(self.chat_panel)
+        top_splitter.setHandleWidth(6)
+        top_splitter.setChildrenCollapsible(False)
+        top_splitter.setSizes([250, 900, 300])
 
-        # Remove the default margins.
-        #
-        # VS Code has very small margins,
-        # giving it a cleaner appearance.
+        bottom_splitter = QSplitter(Qt.Vertical)
+        bottom_splitter.addWidget(top_splitter)
+        bottom_splitter.addWidget(self.terminal)
+        bottom_splitter.setHandleWidth(6)
+        bottom_splitter.setChildrenCollapsible(False)
+        bottom_splitter.setSizes([650, 200])
+
+        self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(0, 0, 0, 0)
-
-        # Remove spacing between widgets.
         self.main_layout.setSpacing(0)
+        self.main_layout.addWidget(bottom_splitter)
 
-        # Attach the layout to the central widget.
         self.central_widget.setLayout(self.main_layout)

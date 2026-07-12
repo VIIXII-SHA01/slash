@@ -7,7 +7,14 @@ Responsibilities:
 """
 
 # sys is used to access command-line arguments and to properly exit the application.
+import os
 import sys
+
+# Ensure the project root is on the Python module search path when this
+# file is executed directly from the project subdirectory.
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
 
 # QApplication is the foundation of every Qt application.
 # It manages the application's event loop, styling, clipboard,
@@ -16,7 +23,7 @@ from PySide6.QtWidgets import QApplication
 
 # Import the main window of our application.
 # The MainWindow class will contain the overall UI layout.
-from ui.main_window import MainWindow
+from ui.default_window import MainWindow
 
 class Slash:
     """
